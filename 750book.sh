@@ -6,9 +6,7 @@
 
 TEXFILE=`basename "$1" .txt`.tex
 
-touch "$TEXFILE"
-./750book-latex.py "$@" > "$TEXFILE"
-echo "Updating the TOC file"
-pdflatex "$TEXFILE"
-echo "Final render!"
+rm "$TEXFILE"
+./750book-latex.py "$@" > "$TEXFILE" &&
+pdflatex "$TEXFILE" &&
 pdflatex "$TEXFILE"

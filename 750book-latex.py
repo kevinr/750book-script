@@ -4,7 +4,27 @@
 # usage: 750book-latex.py INPUT[..]
 
 from mako.template import Template
-import sys
+import sys, re
+
+
+# based off http://stackoverflow.com/questions/2541616/how-to-escape-strip-special-characters-in-the-latex-document/5422751#5422751
+latex_substitutions = {
+    "#": "\\#",
+    "$": "\\$",
+    "%": "\\%",
+    "&": "\\&",
+    "~": "\\~{}",
+    "_": "\\_",
+    "^": "\\^{}",
+    "\\":"\\textbackslash",
+    "{": "\\{",
+    "}": "\\}",
+}
+latex_re = re.compile("([\^\%~\\\\#\$%&_\{\}])")
+
+def sanitize_latex(s):
+    global latex_substitutions, latex_re
+    return latex_re.sub(lambda m: latex_substitutions[m.group(1)], s)
 
 
 def main():
@@ -12,11 +32,30 @@ def main():
     global template
 
     if len(sys.argv) < 2:
-        print "Usage: %s INPUT[..] OUTPUT" % (sys.argv[0])
+        sys.stderr.write("Usage: %s INPUT[..] OUTPUT" % (sys.argv[0]))
         sys.exit(1)
 
     inputs = sys.argv[1:]
     output = sys.stdout
+
+    raw_entry_header_re = re.compile('##### ENTRY ##### ([-\d]+), num_words:(\d+), num_minutes:([.\d]+)')
+    raw_entries = []
+    for filename in inputs:
+        f = open(filename)
+        raw_entry = None
+        for l in f:
+            match = raw_entry_header_re.match(l)
+            if match:
+                if raw_entry:
+                    raw_entry['text'] = sanitize_latex(raw_entry['text'])
+                    raw_entries.append(raw_entry)
+                raw_entry = { 'date': match.group(1), 'words': match.group(2), 'time': match.group(3), 'text': '' }
+            else:
+                if raw_entry:
+                    raw_entry['text'] += l
+                else:
+                    sys.stderr.write("Unexpected leading data; file corrupt.\n")
+                    sys.exit(1)
 
     data = { 'title': "750 Words ``Morning Pages''",
             'author': "Kevin Riggle",
@@ -24,28 +63,7 @@ def main():
             'entries': [
                 Year( '2010', 
                     [
-                        Month('June 2010',
-                            [
-                                {   'date': 'Foo, Bar 17th, 2010',
-                                    'text': 'Lorem ipsum dolor sit amet\ldots',
-                                    'words': '769',
-                                    'time': '257 minutes',
-                                },
-                            ],
-                        ),
-                    ],
-                ),
-                Year( '2011',
-                    [
-                        Month('June 2011',
-                            [
-                                {   'date': 'Tuesday, June 7th, 2011',
-                                    'text': 'Lorem ipsum dolor sit amet\ldots',
-                                    'words': '769',
-                                    'time': '257 minutes',
-                                },
-                            ],
-                        ),
+                        Month('June 2010', raw_entries)
                     ],
                 ),
             ],
