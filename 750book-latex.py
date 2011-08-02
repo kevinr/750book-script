@@ -37,6 +37,8 @@ def main():
         sys.exit(1)
 
     inputs = sys.argv[1:]
+    # XXX TODO output to last arg is bad, runs risk of stomping on things; use getopt!
+    # XXX TODO output to other than STDOUT
     output = sys.stdout
 
     # apparently sometimes the export doesn't include values for num_minutes
@@ -45,7 +47,10 @@ def main():
     for filename in inputs:
         f = open(filename)
         raw_entry = None
-        for l in f:
+        for raw_l in f:
+            # FORCE UTF-8
+            # XXX TODO given that I'm forcing this, do I want to switch to xetex?
+            l = unicode(raw_l, 'utf-8')
             match = raw_entry_header_re.match(l)
             if match:
                 if raw_entry:
@@ -71,7 +76,8 @@ def main():
     }
 
     compiled_template = Template(template)
-    output.write(compiled_template.render(**data))
+    # another place to force UTF-8
+    output.write(compiled_template.render_unicode(**data).encode('utf-8'))
 
 
 class Year(list):
