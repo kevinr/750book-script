@@ -17,7 +17,7 @@ latex_substitutions = {
     "~": "\\~{}",
     "_": "\\_",
     "^": "\\^{}",
-    "\\":"\\textbackslash",
+    "\\":"\\textbackslash ",
     "{": "\\{",
     "}": "\\}",
 }
