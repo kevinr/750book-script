@@ -50,6 +50,7 @@ def main():
     # TODO other options: mean+dev of # paras (test single-para)
     # TODO other options: mean+dev of times taken
     # TODO other options: include weirdnesses (??)
+    # TODO other options: time can be in expn notation, eg. num_minutes:2.74976e-06
     # TODO other options: include Unicode (!!)
     usage = "Usage: %prog --from DATE [--to DATE]"
     parser = optparse.OptionParser(usage=usage)
