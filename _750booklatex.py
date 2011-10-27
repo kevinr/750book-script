@@ -43,17 +43,22 @@ def main():
     sys.exit(0)
 
 
-def render(title='750 Words Morning Pages', author=None, *inputs):
-    """Takes open file-likes, kwargs.  
+def render(*inputs, **kwargs):
+    """Takes open file-likes, kwargs title and author.  
+        Title defaults to '750 Words Morning Pages'.
         
-        Throws ValueError if no author specified, Exception if one of the files appears corrupt.
+        Throws KeyError if no author specified, 
+        Exception if one of the files appears corrupt.
 
         Returns LaTeX document as string."""
 
     global template
 
-    if not author:
-        raise ValueError('No author specified.', author)
+    if not 'author' in kwargs:
+        raise KeyError('No author specified.', author)
+
+    title = 'title' in kwargs and kwargs['title'] or '750 Words Morning Pages'
+    author = kwargs['author']
 
     # apparently sometimes the export doesn't include values for num_minutes
     raw_entry_header_re = re.compile('##### ENTRY ##### ([-\d]+), num_words:(\d+), num_minutes:([.\d]+)?')
