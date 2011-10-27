@@ -29,27 +29,39 @@ def sanitize_latex(s):
 
 
 def main():
+    if len(sys.argv) < 2:
+        sys.stderr.write("Usage: %s INPUT[..] > OUTPUT" % (sys.argv[0]))
+        sys.exit(1)
+
+    inputs = [open(filename) for filename in sys.argv[1:]]
+    # XXX TODO use getopt!
+    # XXX TODO output to other than STDOUT
+    output = sys.stdout
+
+    output.write(render(*inputs, author='Kevin Riggle'))
+
+    sys.exit(0)
+
+
+def render(title='750 Words Morning Pages', author=None, *inputs):
+    """Takes open file-likes, kwargs.  
+        
+        Throws ValueError if no author specified, Exception if one of the files appears corrupt.
+
+        Returns LaTeX document as string."""
 
     global template
 
-    if len(sys.argv) < 2:
-        sys.stderr.write("Usage: %s INPUT[..] OUTPUT" % (sys.argv[0]))
-        sys.exit(1)
-
-    inputs = sys.argv[1:]
-    # XXX TODO output to last arg is bad, runs risk of stomping on things; use getopt!
-    # XXX TODO output to other than STDOUT
-    output = sys.stdout
+    if not author:
+        raise ValueError('No author specified.', author)
 
     # apparently sometimes the export doesn't include values for num_minutes
     raw_entry_header_re = re.compile('##### ENTRY ##### ([-\d]+), num_words:(\d+), num_minutes:([.\d]+)?')
     raw_entries = []
-    for filename in inputs:
-        f = open(filename)
+    for f in inputs:
         raw_entry = None
         for raw_l in f:
             # FORCE UTF-8
-            # XXX TODO given that I'm forcing this, do I want to switch to xetex?
             l = unicode(raw_l, 'utf-8')
             match = raw_entry_header_re.match(l)
             if match:
@@ -64,20 +76,21 @@ def main():
                 if raw_entry:
                     raw_entry['text'] += l
                 else:
-                    sys.stderr.write("Unexpected leading data; file corrupt.\n")
-                    sys.exit(1)
+                    raise Exception("Unexpected leading data; file corrupt.")
 
     entries = process_raw_entries(raw_entries)
 
-    data = { 'title': "750 Words Morning Pages",
-            'author': "Kevin Riggle",
+    # XXX TODO don't hard-code date_string !
+    data = { 'title': title,
+            'author': author,
             'date_string': 'June 2011 - August 2011',
             'entries': entries,
     }
 
     compiled_template = Template(template)
     # another place to force UTF-8
-    output.write(compiled_template.render_unicode(**data).encode('utf-8'))
+    return compiled_template.render_unicode(**data).encode('utf-8')
+    
 
 
 class Year(list):
