@@ -7,6 +7,6 @@
 TEXFILE=`basename "$1" .txt`.tex
 
 rm -f "$TEXFILE"
-./750book-latex.py "$@" > "$TEXFILE" &&
+./_750booklatex.py "$@" > "$TEXFILE" &&
 xelatex "$TEXFILE" &&
 xelatex "$TEXFILE"
