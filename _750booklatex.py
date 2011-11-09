@@ -38,7 +38,8 @@ def main():
     # XXX TODO output to other than STDOUT
     output = sys.stdout
 
-    output.write(render(*inputs, author='Kevin Riggle'))
+    # another place to force UTF-8
+    output.write(render(*inputs, author='Kevin Riggle').encode('utf-8'))
 
     sys.exit(0)
 
@@ -93,8 +94,7 @@ def render(*inputs, **kwargs):
     }
 
     compiled_template = Template(template)
-    # another place to force UTF-8
-    return compiled_template.render_unicode(**data).encode('utf-8')
+    return compiled_template.render_unicode(**data)
     
 
 
