@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
-import sys, lipsum, random, optparse
+import sys, random, optparse
 from datetime import datetime, timedelta
+
+# provided by package lorem-ipsum-generator on PyPI
+import lipsum
 
 lipgen = lipsum.Generator()
 def do_lorem(words):
